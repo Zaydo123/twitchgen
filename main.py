@@ -19,7 +19,7 @@ num = 0
 proxies = []
 session = FuturesSession()
 
-config={"apiKey":'f7d8e2200deb984404612cd8cdd6e11d',"defaultTimeout":600}
+config={"apiKey":'put ur mf api key here',"defaultTimeout":600}
 solver = TwoCaptcha(**config)
 
 
