@@ -1,6 +1,5 @@
 # TTVCreator
-still has bugs but who tf gives a shit
----
+UPDATE: NO MORE BUGS ![alt text](https://tenor.com/bd2mQ.gif)
 **Setup**
 1. pip install -r requirements.txt
 2. Fill Proxies.txt with http proxies (proxy:port)
