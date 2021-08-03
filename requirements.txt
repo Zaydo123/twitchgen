@@ -1,4 +1,4 @@
 requests
 colorama
-2captcha-python
+TwoCaptcha
 requests_futures
