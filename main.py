@@ -7,10 +7,18 @@ from colorama import init, Fore
 from threading import Thread, active_count
 from requests_futures.sessions import FuturesSession
 from twocaptcha import TwoCaptcha
+from os import path
+
+filepaths = ['Proxies.txt','Accounts.txt','Tokens.txt']
+
+for file in filepaths:
+    if os.path.exists(file)!=True:
+        open(file,'w')
+
 
 init(autoreset=True)
 lock = threading.Lock()
-if sys.platform == "linux":
+if sys.platform == "linux" or sys.platform=="darwin":
     clear = lambda: os.system("clear")
 else:
     clear = lambda: os.system("cls")
@@ -18,10 +26,16 @@ else:
 num = 0
 proxies = []
 session = FuturesSession()
+debugmode=False
+if debugmode==True:
+    apikey="dev 2captcha api key"
+if debugmode==True:
+    pass
+else:
+    apikey=input("2captcha api key: ")
 
-config={"apiKey":'put ur mf api key here',"defaultTimeout":600}
-solver = TwoCaptcha(**config)
-
+config={"apiKey":apikey,"defaultTimeout":600}
+solver=TwoCaptcha(config["apiKey"])
 
 def report_bad(id):
     r = requests.get(f"http://2captcha.com/res.php?key={config['apiKey']}&action=reportbad&id="+str(id))
@@ -34,17 +48,6 @@ def report_good(id):
 
 
 class Email:
-
-    def Get_Code(email):
-        r = session.get(f"http://foreskin.market/api/latest/{email}?no-reply@twitch.tv").result()
-        if "verify_code" in r.text:
-            code = r.text.split('vertical-align:top;word-wrap:break-word;border-radius:2px;overflow:hidden"><a href="')[1].split("\"")[0]
-            return code
-        else:
-            time.sleep(5)
-            print(r.text)
-            return False
-
     def Create(email):
         session.get(f'http://foreskin.market/api/{email}@foreskin.market')
         return f"{email}@foreskin.market"
@@ -67,7 +70,6 @@ class CaptchaSolver:
                 break
             else:
                 print(f"{Fore.RED}[#] Unknown Error: {r.text}")
-                report_bad(captcha_id)
                 return None
         return (current_prxy, captcha,captcha_id)
 
@@ -81,28 +83,6 @@ class Twitch:
             f.write(f"{data}\n")
             f.close()
 
-    def Send_Code(token):
-        headers = {
-            "Authorization": f"OAuth {token}"
-        }
-        json = [{"operationName":"CoreAuthCurrentUser","variables":{},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"bc444c5b28754cb660ed183236bb5fe083f2549d1804a304842dad846d51f3ee"}}},{"operationName":"VerficationCodeUser","variables":{},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"77d945a4cee34ec9008cc61a978d7baeabce0631f2aa0076977ba13ac409dda2"}}}]
-        print("sending code")
-        r = session.post("https://gql.twitch.tv/gql", json=json, headers=headers).result()
-        print("sent code",r.text)
-
-    def Verify(token, opaqueID):
-        headers = {
-            "Authorization": f"OAuth {token}",
-            "Client-Id": "kimne78kx3ncx6brgo4mv6wki5h1ko"
-        }
-        json = [{"operationName":"VerifyEmail","variables":{"input":{"opaqueID":opaqueID}},"extensions":{"persistedQuery":{"version":1,"sha256Hash":"4d3cbb19003b87567cb6f59b186e989c69b0751ecdd799be6004d200014258f1"}}}]
-        r = session.post("https://gql.twitch.tv/gql", json=json, headers=headers).result()
-        print("verifying email")
-        if r.json()[0]["data"]["verifyContactMethod"]["isSuccess"]:
-            return True
-        else:
-            return False
-
     def Create(proxy,captcha,captchaid):
         global num
         try:
@@ -110,37 +90,23 @@ class Twitch:
             email = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(12))
             email = Email.Create(email)
             password = ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(15))
-            #print(email,'\n',username,password)
             json = {"username":username,"password":password,"email":f"{email}","birthday":{"day":15,"month":2,"year":2000},"client_id":"kimne78kx3ncx6brgo4mv6wki5h1ko","include_verification_code":True,"arkose":{"token":captcha}}
             r = session.post("https://passport.twitch.tv/register", json=json, proxies={"https": f"http://{proxy}"}, timeout=20).result()
-            #print("CREATED ACCOUNT")
             if "access_token" in r.text:
                 token = r.json()["access_token"]
-                #print(token)
                 report_good(captchaid)
                 num += 1
-                #Twitch.Send_Code(token)
-                #while True:
-                #    verify_code = Email.Get_Code(email)
-                #    print(verify_code)
-                #    if verify_code == False:
-                #        continue
-                #    else:
-                #        break
-                #opaqueID = verify_code.split("email-verification/")[1].split("?")[0]
-                #if Twitch.Verify(token, opaqueID):
-                #    print(f"[\x1b[38;5;199m$\x1b[0m] Successfully Created Verified Account \x1b[38;5;199m#\x1b[0m{num} [\x1b[38;5;199m{username}:{password}\x1b[0m]")
                 Twitch.Save("Accounts", f"{username}:{password}:{token}")
                 Twitch.Save("Tokens", f"{token}")
             elif "Please complete the CAPTCHA correctly" in r.text:
                 report_bad(captchaid)
         except requests.exceptions.ProxyError:
-            proxies.remove(proxy)
+            proxies.pop(proxies.index(proxy))
             with lock:
                 print(f"[$]{Fore.RED}PRXY ERROR",end='\r')
             Twitch.Create(str(random.choice(proxies)),captcha,captchaid)
         except requests.exceptions.ConnectTimeout:
-            proxies.remove(proxy)
+            proxies.pop(proxies.index(proxy))
             with lock:
                 print(f"[$]{Fore.RED}PRXY ERROR",end='\r')
             Twitch.Create(str(random.choice(proxies)),captcha,captchaid)
@@ -149,50 +115,66 @@ class Twitch:
                 print(f"[$]{Fore.RED}PRXY ERROR",end='\r')
             Twitch.Create(str(random.choice(proxies)),captcha,captchaid)
         except Exception as e:
-            if str(e).find("list.remove")!=-1:
-                return
-            print(e)
+            with lock:
+                print(e)
             return
 
 def Load_Proxy():
     for line in open('Proxies.txt'):
         proxies.append(line.replace('\n', ''))
-    print(f"{Fore.MAGENTA}[$]{Fore.RESET} Loaded {len(proxies)} Proxies")
-
+    print(f"{Fore.BLUE}[$]{Fore.RESET} Loaded {len(proxies)} Proxies")
+    if len(proxies)==0:
+        print(Fore.RED+"Please fill Proxies.txt")
+        time.sleep(5)
+        quit()
 def Task():
     try:
         output = CaptchaSolver.Create_Task()
         if output == None:
             return
-        #print(str(output))
         current_proxy = output[0];captcha = output[1];captcha_id = output[2]
-        print(f"{Fore.MAGENTA}[$]{Fore.RESET} {current_proxy} : Creating Twitch Account")
+        with lock:
+            print(f"{Fore.BLUE}[$]{Fore.RESET} {current_proxy} : Creating Twitch Account")
         Twitch.Create(current_proxy,captcha,captcha_id)
 
     except Exception as e:   
-        print(f"{e}\n\n")
-        print("[@] Fatal Captcha Error.")
+        with lock:
+            print(e)
+            print("[@] Fatal Captcha Error.")
 
 if __name__ == "__main__":
     clear()
-    print("""
-\x1b[38;5;199m.▄▄ · ▄▄▌ ▐ ▄▌ ▄▄▄· ▄▄▄▄▄▄▄▄▄▄▄▄▄ .·▄▄▄▄  
-▐█ ▀. ██· █▌▐█▐█ ▀█ •██  •██  ▀▄.▀·██▪ ██ 
-▄▀▀▀█▄██▪▐█▐▐▌▄█▀▀█  ▐█.▪ ▐█.▪▐▀▀▪▄▐█· ▐█▌
-▐█▄▪▐█▐█▌██▐█▌▐█ ▪▐▌ ▐█▌· ▐█▌·▐█▄▄▌██. ██ 
- ▀▀▀▀  ▀▀▀▀ ▀▪ ▀  ▀  ▀▀▀  ▀▀▀  ▀▀▀ ▀▀▀▀▀• \x1b[0mTwitch
+    print(f"""{Fore.BLUE}
+   .-') _               ('-.       .-') _  
+  (  OO) )            _(  OO)     ( OO ) ) 
+,(_)----.  ,----.    (,------.,--./ ,--,'  
+|       | '  .-./-')  |  .---'|   \ |  |\  
+'--.   /  |  |_( O- ) |  |    |    \|  | ) 
+(_/   /   |  | .--, \(|  '--. |  .     |/  
+ /   /___(|  | '. (_/ |  .--' |  |\    |   
+|        ||  '--'  |  |  `---.|  | \   |   
+`--------' `------'   `------'`--'  `--'   
+{Fore.GREEN}[TWITCH GENERATOR - Zayd#1234]
 """)
     Load_Proxy()
-    print(f"{Fore.MAGENTA}[$]{Fore.RESET} Current Balance: {str(solver.balance())}")
+    print(f"{Fore.BLUE}[$]{Fore.RESET} Current Balance: {str(solver.balance())}")
     #Task()
-    threadct=int(input("How many threads: "))
+    threadct=int(input("Thread Count: "))
+    goal_amt = input("Amount To Generate (approximate): ")
     while True:
-        os.system(f"""title, Threadcount = {threading.activeCount()} // Current Balance: {str(solver.balance())} // Successful:{num} """)
+        if sys.platform!="darwin":
+            os.system(f"""title, Threadcount = {active_count()-1} // Current Balance: {str(solver.balance())} // Successful:{num} """)
         time.sleep(.5)
-        if active_count() >=threadct:
+        if active_count()-1 >=threadct:
             pass
         else:
-            try:
-                Thread(target=Task).start()
-            except (KeyboardInterrupt, SystemExit):
-                sys.exit() 
+            if num>=int(goal_amt):
+                print("DONE CREATING ACCOUNTS... ALLOWING THREADS TO FINISH")
+                print("You may need to close the program manually, give me a sec.")
+                break
+            else:
+                try:
+                    Thread(target=Task).start()
+                except (KeyboardInterrupt, SystemExit):
+                    sys.exit() 
+    
