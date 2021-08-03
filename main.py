@@ -157,13 +157,13 @@ if __name__ == "__main__":
 {Fore.GREEN}[TWITCH GENERATOR - Zayd#1234]
 """)
     Load_Proxy()
-    print(f"{Fore.BLUE}[$]{Fore.RESET} Current Balance: {str(solver.balance())}")
+    print(f"{Fore.BLUE}[$]{Fore.RESET} Current Balance: {str(solver.get_balance())}")
     #Task()
     threadct=int(input("Thread Count: "))
     goal_amt = input("Amount To Generate (approximate): ")
     while True:
         if sys.platform!="darwin":
-            os.system(f"""title, Threadcount = {active_count()-1} // Current Balance: {str(solver.balance())} // Successful:{num} """)
+            os.system(f"""title, Threadcount = {active_count()-1} // Current Balance: {str(solver.get_balance())} // Successful:{num} """)
         time.sleep(.5)
         if active_count()-1 >=threadct:
             pass
