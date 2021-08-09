@@ -7,8 +7,40 @@ from colorama import init, Fore
 from threading import Thread, active_count
 from requests_futures.sessions import FuturesSession
 from twocaptcha import TwoCaptcha
+from AuthGG.client import Client
 from os import path
 
+def clear():
+    if sys.platform == "linux" or sys.platform=="darwin":
+        os.system("clear")
+    else:
+        os.system("cls")
+
+#authgg shit
+clear()
+client = Client(api_key="BPMGYAWYEJGH", aid="40366", application_secret="fvMElFim0qfl11imG7aZT83oReAAFPrTi9g")
+print("[Login]\nleave fields empty if you'd like to sign up\n____________________\n")
+
+username = input("Username: ")
+password = input("Password: ")
+if username == "" and password== "":
+    clear()
+    email = input("Email: ")
+    license_key = input("License: ")
+    username = input("Username: ")
+    password = input("Password: ")
+    try:
+	    client.register(email=email, username=username, password=password, license_key=license_key)
+    except Exception as e:
+	    print(e)
+try:
+	client.login(username, password)
+	clear()
+except Exception as e:
+	print(e)
+    time.sleep(10);quit()
+
+######
 filepaths = ['Proxies.txt','Accounts.txt','Tokens.txt']
 
 for file in filepaths:
@@ -18,10 +50,6 @@ for file in filepaths:
 
 init(autoreset=True)
 lock = threading.Lock()
-if sys.platform == "linux" or sys.platform=="darwin":
-    clear = lambda: os.system("clear")
-else:
-    clear = lambda: os.system("cls")
 
 num = 0
 proxies = []
@@ -157,13 +185,13 @@ if __name__ == "__main__":
 {Fore.GREEN}[TWITCH GENERATOR - Zayd#1234]
 """)
     Load_Proxy()
-    print(f"{Fore.BLUE}[$]{Fore.RESET} Current Balance: {str(solver.get_balance())}")
+    print(f"{Fore.BLUE}[$]{Fore.RESET} Current Balance: {str(solver.balance())}")
     #Task()
     threadct=int(input("Thread Count: "))
     goal_amt = input("Amount To Generate (approximate): ")
     while True:
         if sys.platform!="darwin":
-            os.system(f"""title, Threadcount = {active_count()-1} // Current Balance: {str(solver.get_balance())} // Successful:{num} """)
+            os.system(f"""title, THREADS = {active_count()-1} > Current Balance: {str(solver.balance())} > CREATED: {num} """)
         time.sleep(.5)
         if active_count()-1 >=threadct:
             pass
@@ -177,4 +205,3 @@ if __name__ == "__main__":
                     Thread(target=Task).start()
                 except (KeyboardInterrupt, SystemExit):
                     sys.exit() 
-    
