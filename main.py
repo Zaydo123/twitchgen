@@ -18,39 +18,38 @@ def clear():
 
 #authgg shit
 clear()
-client = Client(api_key="BPMGYAWYEJGH", aid="40366", application_secret="fvMElFim0qfl11imG7aZT83oReAAFPrTi9g")
-print("[Login]\nleave fields empty if you'd like to sign up\n____________________\n")
+client = Client(api_key="53152287847221736759558777617683354555", aid="373945", application_secret="fvMElFim0qfl11imG7aZT83oReAAFPrTi9g")
 
-username = input("Username: ")
-password = input("Password: ")
-if username == "" and password== "":
-    clear()
-    email = input("Email: ")
-    license_key = input("License: ")
+def login():
+    print("[Login]\nleave fields empty if you'd like to sign up\n____________________\n")
     username = input("Username: ")
     password = input("Password: ")
+    if username == "" and password== "":
+        clear()
+        email = input("Email: ")
+        license_key = input("License: ")
+        username = input("Username: ")
+        password = input("Password: ")
+        try:
+    	    client.register(email=email, username=username, password=password, license_key=license_key)
+        except Exception as e:
+    	    print(e);time.sleep(5);clear();login()
     try:
-	    client.register(email=email, username=username, password=password, license_key=license_key)
+    	client.login(username, password)
+    	clear()
     except Exception as e:
-	    print(e)
-try:
-	client.login(username, password)
-	clear()
-except Exception as e:
-	print(e)
-    time.sleep(10);quit()
-
+    	print(e);time.sleep(5);clear();login()
+login()
 ######
 filepaths = ['Proxies.txt','Accounts.txt','Tokens.txt']
-
 for file in filepaths:
     if os.path.exists(file)!=True:
-        open(file,'w')
-
+        print(Fore.BLUE+"[SETUP] Creating Files"+Fore.RESET)
+        newfile=open(file,'w')
+        newfile.close()
 
 init(autoreset=True)
 lock = threading.Lock()
-
 num = 0
 proxies = []
 session = FuturesSession()
@@ -60,7 +59,7 @@ if debugmode==True:
 if debugmode==True:
     pass
 else:
-    apikey=input("2captcha api key: ")
+    apikey=input(Fore.BLUE+"[LOGIN] 2Captcha API Key: "+Fore.RESET)
 
 config={"apiKey":apikey,"defaultTimeout":600}
 solver=TwoCaptcha(config["apiKey"])
@@ -191,14 +190,14 @@ if __name__ == "__main__":
     goal_amt = input("Amount To Generate (approximate): ")
     while True:
         if sys.platform!="darwin":
-            os.system(f"""title, THREADS = {active_count()-1} > Current Balance: {str(solver.balance())} > CREATED: {num} """)
+            os.system(f"""title, THREADS: {active_count()-1}    2Captcha Balance: {str(solver.balance())}    CREATED: {num} """)
         time.sleep(.5)
         if active_count()-1 >=threadct:
             pass
         else:
             if num>=int(goal_amt):
-                print("DONE CREATING ACCOUNTS... ALLOWING THREADS TO FINISH")
-                print("You may need to close the program manually, give me a sec.")
+                print("\n\nDONE CREATING ACCOUNTS... ALLOWING THREADS TO FINISH")
+                print("You may need to close the program manually, give me a sec.\n\n")
                 break
             else:
                 try:
