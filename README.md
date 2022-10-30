@@ -1,9 +1,3 @@
-# TTVCreator
-## UPDATE: NO MORE BUGS ![alt text](https://media.tenor.com/images/b594026b639bbe538986c0bfc42c6e26/tenor.gif) 
-
-**Setup**
-1. pip install -r requirements.txt
-2. Fill Proxies.txt with http proxies (proxy:port)
-3. Run main.py
----
-![alt text](https://media.tenor.com/images/c78f273d8f6a182827a539302582adb6/tenor.gif)
+# TTV GEN (PATCHED)
+This was a project I worked on about a year or so ago:
+It is a proof of concept twitch.tv account creator. It no longer works and this was made for educational purposes to show how easy it is to abuse the social services we use today.
